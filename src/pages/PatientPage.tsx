@@ -1,19 +1,9 @@
 import React from "react";
 import { Edit } from "../components/icons/Edit";
-import { Delete } from "../components/icons/delete";
-import { Patient } from "../utils/types";
+import { Delete } from "../components/icons/Delete";
+import { Modal } from "../components/modals/Modal";
+import { usePatients } from "../hooks/usePatients";
 
-const patientsData: Patient[] = [
-  {
-    id: 1,
-    name: "Faisal Khan",
-    age: 23,
-    gender: "male",
-    phoneNumber: "9302411475",
-    address: "Bhopal",
-    doctor_in_charge: "Dr. Doom",
-  },
-];
 const ColumnHeader: React.FC<{
   title: string;
   className?: string;
@@ -30,13 +20,31 @@ const ColumnHeader: React.FC<{
 };
 
 export const PatientPage = () => {
+  const { patients, deletePatient } = usePatients();
+
   //
   return (
     <div className="w-screen h-screen bg-[#F2F5F7]">
       {/* Patients data */}
 
-      <div className="flex justify-center items-center w-full">
-        <div className="w-[90%] overflow-hidden shadow-sm rounded-lg mt-[30px]">
+      <div className="flex flex-col justify-center items-center w-full">
+        {/* create user modal */}
+        <div className="w-[90%] flex justify-end items-center mt-[20px]">
+          <Modal
+            action="create"
+            trigger={
+              <button
+                onClick={async (e) => {
+                  e.preventDefault();
+                }}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition cursor-pointer"
+              >
+                Register User +
+              </button>
+            }
+          />
+        </div>
+        <div className="w-[90%] overflow-hidden shadow-sm rounded-lg mt-[15px]">
           <table className="w-full border border-gray-300 rounded-md overflow-hidden">
             <thead className="bg-gray-50">
               <tr>
@@ -57,9 +65,12 @@ export const PatientPage = () => {
             </thead>
 
             <tbody>
-              {patientsData.map((patient) => {
+              {patients.map((patient) => {
                 return (
-                  <tr className="border-t border-gray-200 hover:bg-gray-50 transition-colors duration-150">
+                  <tr
+                    key={patient.id}
+                    className="border-t border-gray-200 hover:bg-gray-50 transition-colors duration-150"
+                  >
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {patient.name}
                     </td>
@@ -73,17 +84,29 @@ export const PatientPage = () => {
                       {patient.address}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
-                      {patient.phoneNumber}
+                      {patient.phonenumber}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {patient.doctor_in_charge}
                     </td>
                     <td className="flex items-center  gap-[15px] px-4 py-3 text-sm text-gray-600">
                       {/* update paitent */}
-                      <button>
-                        <Edit className="text-green-700 hover:text-green-600 cursor-pointer" />
-                      </button>
-                      <button>
+
+                      <Modal
+                        action="update"
+                        trigger={
+                          <Edit className="text-green-700 hover:text-green-600 cursor-pointer" />
+                        }
+                        id={patient.id}
+                      />
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => {
+                          if (window.confirm("Do you want to delete Patient")) {
+                            deletePatient(patient.id);
+                          }
+                        }}
+                      >
                         <Delete className="text-red-600 hover:text-red-400 cursor-pointer" />
                       </button>
                     </td>
@@ -92,6 +115,11 @@ export const PatientPage = () => {
               })}
             </tbody>
           </table>
+          {patients.length === 0 && (
+            <div className="w-full h-[30px] flex items-center justify-center">
+              No Data
+            </div>
+          )}
         </div>
       </div>
     </div>
